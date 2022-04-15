@@ -1,8 +1,12 @@
 import React from "react";
+import { useDispatch } from 'react-redux';
 import PropTypes from "prop-types";
 import { Item, List, Btn } from "./ContactsList.styled";
+import { deleteItem } from "redux/contactSlice";
+import toast, { Toaster } from 'react-hot-toast';
 
-const ContactsList = ({ contacts, onDeleteContact }) => {
+const ContactsList = ({ contacts } ) => {
+  const dispatch = useDispatch();
   return (
     <List>
       {contacts.map((contact) => (
@@ -14,20 +18,21 @@ const ContactsList = ({ contacts, onDeleteContact }) => {
             id={contact.id}
             type="button"
             onClick={() => {
-              onDeleteContact(contact.id);
+              dispatch(deleteItem(contact.id))
+              toast.success('Contact deleted');
             }}
           >
             Delete
           </Btn>
         </Item>
       ))}
+      <Toaster/>
     </List>
   );
 };
 
 ContactsList.propTypes = {
   contacts: PropTypes.array.isRequired,
-  onDeleteContact: PropTypes.func.isRequired,
 };
 
 export default ContactsList;

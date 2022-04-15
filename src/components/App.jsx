@@ -1,50 +1,37 @@
-import React, { useState, useEffect } from "react";
 import ContactForm from "./ContactForm/ContactForm";
 import { Container } from "./App.styled";
 import ContactsList from "./ContactList/ContactList";
 import Filter from "./Filter/Filter";
 import Title from "./Title/Title";
 import { GlobalStyle } from "./GlobalStyle";
-import { nanoid } from "nanoid";
 import toast, { Toaster } from 'react-hot-toast';
+import { useSelector, useDispatch } from 'react-redux';
+import { newItem } from "redux/contactSlice";
+
 
 const App = () => {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
+    let contacts = useSelector(state => state.contacts.items);
+    const dispatch = useDispatch();
+    const filter = useSelector(state => state.contacts.filter);
 
-  useEffect(() => {
-    const parseLocalContacts = JSON.parse(localStorage.getItem('contacts'));
-    if (parseLocalContacts) {
-      setContacts(parseLocalContacts)
-    }
-  }, []);
 
-  useEffect(() => {
-    window.localStorage.setItem('contacts', JSON.stringify(contacts))
-  }, [contacts]);
-
-  const  handleFormSubmit = ( name, number ) => {
-    const checkForContact = contacts.some(
-      contact => contact.name.toLowerCase() === name.toLowerCase()
+  const  handleFormSubmit = ( data ) => {
+    const checkForContact = contacts.find(
+      contact => contact.name.toLowerCase() === data.name.toLowerCase()
     );
 
     if (checkForContact) {
-      toast.error(`${name} is already in contacts.`)
-      return;
+      return toast.error(`${data.name} is already in contacts.`)
     }
-    setContacts([...contacts, { name, id: nanoid(), number }]);
+    dispatch(newItem(data));
   };
 
-  const deleteContact = (id) => {
-    const actualСontacts = contacts.filter((contact) => contact.id !== id);
-    setContacts(actualСontacts);
-    toast.success('Contact deleted');
-  };
 
   const filterByName = () => {
-    return contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
+    return contacts.filter((contact) => 
+       contact.name.toLowerCase().includes(filter.toLowerCase())
     );
+    
   };
 
     return (
@@ -54,9 +41,8 @@ const App = () => {
         <Title title="Phonebook" />
         <ContactForm onSubmit={handleFormSubmit} />
         <Title title="Contacts" />
-        <Filter onChangeFilter={ev => setFilter(ev.target.value)} filter={filter} />
+        <Filter />
         <ContactsList
-          onDeleteContact={deleteContact}
           contacts={filterByName()}
         />
       </Container>
